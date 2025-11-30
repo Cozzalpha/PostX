@@ -11,7 +11,7 @@ from django.core.files.base import ContentFile
 
 # --- CONFIGURATION ---
 # ⚠️ REPLACE THIS WITH YOUR ACTUAL API KEY
-GEMINI_API_KEY = "AIzaSyBxkvJFxhBaPD7fxCp3SGxJvwLNybo2xr4"
+GEMINI_API_KEY = "upload it here"
 NGROK_URL = "https://janessa-unwedded-forrest.ngrok-free.dev"
 genai.configure(api_key=GEMINI_API_KEY)
 
