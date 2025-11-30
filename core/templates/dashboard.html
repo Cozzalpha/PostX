@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
+            {% if is_admin %}Super Admin Dashboard{% else %}Marketing Hub{% endif %}
+        </h1>
+        <p class="text-slate-500 mt-1">Manage your campaigns and scheduled content.</p>
+    </div>
+    <div class="flex gap-3">
+        <a href="{% url 'create_post' %}" class="flex items-center bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg font-bold shadow-sm hover:bg-slate-50 transition">
+            📝 Single Post
+        </a>
+        <a href="{% url 'create_campaign' %}" class="flex items-center bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-bold shadow-md hover:bg-indigo-700 transition">
+            🚀 Auto-Campaign
+        </a>
+    </div>
+</div>
+
+{% if campaigns %}
+<div class="mb-12">
+    <h2 class="text-xl font-bold text-slate-800 mb-5 flex items-center gap-2">
+        <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-md text-sm">🤖</span> 
+        Auto-Campaigns
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for camp in campaigns %}
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center transition hover:shadow-md {% if not camp.is_active %}bg-slate-50 opacity-75{% endif %}">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <h3 class="font-bold text-lg text-gray-900">{{ camp.name }}</h3>
+                    {% if camp.is_active %}
+                    <span class="bg-green-100 text-green-700 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full font-bold">Running</span>
+                    {% else %}
+                    <span class="bg-slate-200 text-slate-600 text-[10px] uppercase tracking-wider px-2 py-1 rounded-full font-bold">Stopped</span>
+                    {% endif %}
+                </div>
+                <div class="text-sm text-slate-600 space-y-1">
+                    <p>Type: <b>{{ camp.get_type_display }}</b></p>
+                    <p>Schedule: <b>{{ camp.posts_per_day }} posts/day</b> until {{ camp.end_date|date:"M d" }}</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                {% if camp.is_active %}
+                <a href="{% url 'stop_campaign' camp.id %}" class="text-amber-600 hover:bg-amber-50 px-3 py-2 rounded-lg font-medium border border-amber-200 transition text-sm">
+                    ⏸ Pause
+                </a>
+                {% else %}
+                <a href="{% url 'restart_campaign' camp.id %}" class="text-green-600 hover:bg-green-50 px-3 py-2 rounded-lg font-medium border border-green-200 transition text-sm">
+                    ▶ Resume
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'delete_campaign' camp.id %}" class="text-red-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition" onclick="return confirm('Delete this campaign and future posts?');">
+                    🗑
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div>
+    <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+        <span class="bg-indigo-100 text-indigo-700 p-1.5 rounded-md text-sm">📅</span>
+        Content Timeline
+    </h2>
+
+    {% regroup posts by scheduled_time.date as date_list %}
+
+    <div class="space-y-10">
+        {% for date_group in date_list %}
+        <div class="relative">
+            <div class="sticky top-0 z-10 bg-slate-50/95 backdrop-blur py-2 mb-4 border-b border-slate-200 flex items-center gap-4">
+                <h3 class="text-lg font-bold text-slate-700">
+                    {{ date_group.grouper|date:"l, F jS" }}
+                </h3>
+                <span class="text-xs font-semibold bg-slate-200 text-slate-500 px-2 py-0.5 rounded-full">
+                    {{ date_group.list|length }} posts
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for post in date_group.list %}
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative group hover:shadow-md transition-shadow">
+                    
+                    <div class="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <a href="{% url 'delete_post' post.id %}" class="bg-white text-red-500 hover:text-red-700 p-1.5 rounded shadow border border-slate-100 block" onclick="return confirm('Delete this post?');">
+                            🗑
+                        </a>
+                    </div>
+
+                    <div class="h-1.5 w-full 
+                        {% if post.status == 'posted' %}bg-green-500
+                        {% elif post.status == 'waiting_approval' %}bg-amber-400
+                        {% elif post.status == 'approved' %}bg-blue-500
+                        {% elif post.status == 'error' %}bg-red-500
+                        {% else %}bg-slate-300{% endif %}">
+                    </div>
+
+                    <div class="relative h-40 bg-slate-100 border-b border-slate-100">
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="flex flex-col items-center justify-center h-full text-slate-400">
+                                <span class="text-2xl mb-1">🖼️</span>
+                                <span class="text-xs">Using Logo</span>
+                            </div>
+                        {% endif %}
+                        <span class="absolute bottom-2 right-2 px-2 py-1 text-xs font-bold rounded bg-black/50 text-white backdrop-blur-sm">
+                            {{ post.scheduled_time|date:"H:i" }}
+                        </span>
+                    </div>
+
+                    <div class="p-4 flex-1 flex flex-col">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                                {{ post.get_status_display }}
+                            </span>
+                        </div>
+
+                        <h4 class="font-bold text-slate-800 text-sm mb-3 line-clamp-2" title="{{ post.news_update }}">
+                            {{ post.news_update }}
+                        </h4>
+                        
+                        {% if post.generated_caption %}
+                            <div class="bg-slate-50 p-2.5 rounded-lg text-xs text-slate-600 mb-3 h-28 overflow-y-auto border border-slate-200 leading-relaxed">
+                                {{ post.generated_caption|linebreaksbr }}
+                            </div>
+                            
+                            {% if post.status == 'waiting_approval' %}
+                            <div class="flex gap-2 mt-auto pt-2 border-t border-slate-100">
+                                <a href="{% url 'approve_post' post.id %}" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-1.5 rounded text-xs font-bold transition shadow-sm">
+                                    Approve
+                                </a>
+                                <a href="{% url 'edit_post' post.id %}" class="px-3 bg-white border border-slate-300 text-slate-600 text-center py-1.5 rounded text-xs font-medium hover:bg-slate-50 transition">
+                                    Edit
+                                </a>
+                                <a href="{% url 'regenerate_caption' post.id %}" class="px-2 bg-white border border-slate-300 text-slate-600 text-center py-1.5 rounded text-xs font-medium hover:bg-slate-50 transition" title="Rewrite">
+                                    🔄
+                                </a>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="bg-slate-50 p-2 rounded text-xs text-slate-400 h-28 flex flex-col items-center justify-center border border-dashed border-slate-300">
+                                {% if post.status == 'draft' %}
+                                    <span>📝 Draft Mode</span>
+                                {% else %}
+                                    <span class="animate-pulse">✨ Generating AI...</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if post.status == 'draft' %}
+                            <div class="mt-auto pt-2">
+                                <a href="{% url 'edit_post' post.id %}" class="block w-full bg-slate-700 hover:bg-slate-800 text-white text-center py-1.5 rounded text-xs font-bold transition">
+                                    Resume Editing
+                                </a>
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if not posts %}
+    <div class="col-span-3 text-center py-16 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+        <div class="text-4xl mb-3">📭</div>
+        <h3 class="text-lg font-medium text-slate-900">No scheduled content</h3>
+        <p class="text-slate-500 mb-6">Get started by creating a post or campaign.</p>
+        <a href="{% url 'create_post' %}" class="text-indigo-600 font-bold hover:underline">Create Post &rarr;</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

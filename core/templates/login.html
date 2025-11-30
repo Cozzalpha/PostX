@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 class="text-center text-3xl font-extrabold text-slate-900">
+            Sign in to dashboard
+        </h2>
+        <p class="mt-2 text-center text-sm text-slate-600">
+            Or contact admin for access
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-10 shadow-xl rounded-2xl border border-slate-100">
+            <form class="space-y-6" method="post">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r">
+                        <p class="text-sm text-red-700">Invalid username or password.</p>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <label for="id_username" class="block text-sm font-medium text-slate-700">Username</label>
+                    <div class="mt-1">
+                        <input id="id_username" name="username" type="text" required class="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="id_password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <div class="mt-1">
+                        <input id="id_password" name="password" type="password" required class="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-lg shadow-sm placeholder-slate-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                        Sign in
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

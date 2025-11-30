@@ -1,0 +1,189 @@
+# 🤖 Social Agent AI
+
+A Django-based automation platform that uses **Google Gemini** to generate content and **Celery/Redis** to schedule and publish posts directly to **Instagram/Facebook**.
+
+---
+
+## 📋 Prerequisites
+
+Before running the project, you must have these installed:
+
+1.  **Python 3.10+**: [Download Here](https://www.python.org/downloads/)
+2.  **Docker Desktop**: [Download Here](https://www.docker.com/products/docker-desktop/) (Required for Redis)
+3.  **Ngrok**: [Download Here](https://ngrok.com/download) (Required for public image URLs)
+
+---
+
+## 🛠️ Installation & Setup
+
+### 1. Database & Project Setup
+
+1.  **Clone the repository:**
+    ```bash
+    cd social_agent
+    ```
+
+2.  **Create and Activate Virtual Environment:**
+    * **Windows:**
+        ```bash
+        python -m venv venv
+        venv\Scripts\activate
+        ```
+    * **Mac/Linux:**
+        ```bash
+        python3 -m venv venv
+        source venv/bin/activate
+        ```
+
+3.  **Install Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Initialize the Database:**
+    ```bash
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
+
+5.  **Create an Admin User:**
+    ```bash
+    python manage.py createsuperuser
+    ```
+
+### 2. Ngrok Setup (Crucial for Facebook API)
+
+Facebook cannot access images on `localhost`. You must tunnel your local server to the internet.
+
+1.  **Install Ngrok** from the link above.
+2.  **Authenticate Ngrok** (Run this once):
+    ```bash
+    ngrok config add-authtoken YOUR_NGROK_TOKEN
+    ```
+    *(Get your token from the [Ngrok Dashboard](https://dashboard.ngrok.com/get-started/your-authtoken))*
+
+---
+
+## 🚀 Running the Project
+
+To run the full system, you must open **4 separate terminal windows**.
+
+### Terminal 1: Start Redis (The Memory)
+This starts the database that holds your scheduled tasks.
+```bash
+docker run -d -p 6379:6379 --name social-redis redis
+
+
+1. The "God Mode" (Django Admin Panel)
+URL: http://127.0.0.1:8000/admin/ Login: Use the superuser credentials you created in the terminal (e.g., admin / password).
+
+What you do here: This is where you set up your customers. You must do this first before a client can log in.
+
+Create a User for the Client:
+
+Go to Users -> Add User.
+
+Username: urban_eats
+
+Password: password123
+
+Click Save.
+
+Create the Client Profile:
+
+Go back to Home -> Clients -> Add Client.
+
+User: Select urban_eats (the one you just made).
+
+Company Name: "Urban Eats".
+
+Instagram Access Token: Paste the long 60-day token.
+
+Instagram Business ID: Paste the ID.
+
+Click Save.
+
+2. The "Super User Dashboard" (SaaS View)
+URL: http://127.0.0.1:8000/ Login: Use your Superuser credentials.
+
+What you see here: Because you are an Admin (is_superuser=True), the code I gave you (views.py) will show you ALL campaigns from ALL clients.
+
+You can see "Urban Eats" posts.
+
+You can see "TechHive" posts.
+
+You can Approve/Edit anything.
+
+3. The "Client View" (What they see)
+URL: http://127.0.0.1:8000/ Login: Use the Client credentials (urban_eats / password123).
+
+What you see here:
+
+You ONLY see posts for "Urban Eats".
+
+You cannot see other clients.
+
+You can create new campaigns for yourself.
+
+
+
+
+Stuff to add.
+1. Auto post a certain topic for some period of time. (1-5 post a day)
+2. Automate (1-5) post everyday on client bio. 
+3. Better UI( add logo on website better sign in dark mode.)
+4. Sync with Google calender. 
+5. photos size issue, videos also(might be done when switching it fully). 
+6. more insta features like tag and othere stuff. 
+7. Handle error post.
+8. even if the post is scheduled later make the caption right after its scheduled in. so he 
+Stuff to do.
+1. Make 5 insta buisness acc and their token and id. TASK:
+       
+       
+        Write a high-engaging Instagram caption using the AIDA framework.
+        Include 3-5 emojis and end with 5 hashtags.   
+        Keep these stuff in your mind: 
+        1. Strong Opening Hook
+        The first sentence is crucial, as it determines whether a user stops scrolling. 
+        Ask a question to prompt immediate thought or a reply.
+        State a surprising fact or statistic to pique curiosity.
+        Create urgency or a sense of FOMO (Fear Of Missing Out).
+        Use provocative language that challenges conventional wisdom. 
+        2. Clarity and Conciseness
+        Get straight to the point.
+        Use simple language that is easy to read quickly.
+        Employ bullet points or numbered lists to break up text and make it scannable.
+        Keep paragraphs short (1-2 sentences typically) to avoid the "wall of text" effect. 
+        3. Provide Value
+        The best posts offer something in return for the reader's time. 
+        Educate the audience with quick tips or insights.
+        Inspire with motivational stories or quotes.
+        Entertain with humor or relatable anecdotes.
+        Solve a problem by addressing common pain points the audience faces. 
+        4. Call to Action (CTA)
+        Tell the audience exactly what you want them to do next. A clear CTA increases engagement rates . 
+        "Comment below..." (for opinions or answers).
+        "Share this post if you agree..." (for reach).
+        "Link in bio/Swipe up to learn more..." (for driving traffic).
+        "Tag a friend who needs this..." (for audience growth). 
+        5. Tone and Personality
+        The writing should reflect a consistent brand voice that makes the post uniquely yours. 
+        Be authentic and avoid sounding like a generic corporate bot.
+        Use conversational language as if speaking to a friend.
+        Incorporate emojis appropriately to convey emotion and visual interest, making the tone more approachable. 
+        6. Searchability and Reach
+        While not purely "text," these text-adjacent elements help your post get seen.
+        Strategic use of hashtags helps the post get discovered by people who don't follow you .
+        Tagging relevant accounts can attract the attention of larger audiences and potential collaborators. 
+        ⚠️ STRICT OUTPUT RULES (DO NOT IGNORE):
+        1. Return ONLY the final caption text.
+        2. Do NOT add introductions like "Here is a caption" or "Sure!".
+        3. Do NOT add quotes "" around the text.
+        4. Start the response immediately with the hook/headline.
+        """
+
+
+        python manage.py makemigrations core
+python manage.py migrate
+python manage.py createsuperuser
